@@ -1,0 +1,88 @@
+ID;Abbreviazione;Denominazione;Benennung;Descrizione;Beschreibung;Localita;Linea;Linie;VarA;VarR;NumLin
+1;1 BZ;1 Bolzano;1 Bozen;Cardano-Via Fago;Kardaun-Fagenstr.-Kardaun;Bolzano-Bozen;1;1;600;700;1
+2;1 BZ;1 Bolzano;1 Bozen;Cardano-Funivia S. Genesio;Kardaun-Seilbahn Jenesien-Kardaun;Bolzano-Bozen;1 Festiva;1 Sonn- und Feiertage;601;701;1
+3;2 BZ;2 Bolzano;2 Bozen;Stazione Bz-Laives-Bronzolo-Laives-Stazione Bz;Bahnhof Bz-Leifers-Branzoll-Leifers-Bahnhof;Bolzano-Bozen;2;2;602;702;2
+4;2 BZ;2 Bolzano;2 Bozen;Stazione Bz-Pineta-Bronzolo-Pineta-Stazione Bz;Bahnhof Bz-Steinmannwald-Branzoll-Steinmannwald-Bahnhof Bz;Bolzano-Bozen;2 Pineta;2 Steinmannw.;635;735;2
+5;2 BZ;2 Bolzano;2 Bozen;Stazione Bz-Zona industriale- Laives-Bronzolo-Laives-Zona industriale-Stazione Bz;Bahnhof Bz-Inustriezone-Leifers-Branzoll-Leifers-Inustriezone-Bahnhof Bz;Bolzano-Bozen;2 ZI;2 IZ;634;734;2
+6;2 BZ;2 Bolzano;2 Bozen;Stazione Bz-Pineta-Laives-Bronzolo-Laives-Pineta-Stazione Bz;Bahnhof-Steinmannwald-Leifers-Branzoll-Leifers-Steinmannwald-Bahnhof;Bolzano-Bozen;2 Sab. Pineta;2 Sam. Steinm.;690;790;2
+7;2 BZ;2 Bolzano;2 Bozen;Stazione Bz-Laives-Bronzolo-Laives-Stazione Bz;Bahnhof Bz-Leifers-Branzoll-Leifers-Bahnhof;Bolzano-Bozen;2 Sabato;2 Samstag;692;792;2
+8;2 BZ;2 Bolzano;2 Bozen;Stazione Bz-Zona industriale- Laives-Bronzolo-Laives-Zona industriale-Stazione Bz;Bahnhof Bz-Inustriezone-Leifers-Branzoll-Leifers-Inustriezone-Bahnhof Bz;Bolzano-Bozen;2 Sab. ZI;2 Sam. IZ;696;796;2
+9;3 BZ;3 Bolzano;3 Bozen;Stazione-Piazza Vittoria-Via Bari-Via Emeri-Via Bari-Piazza Vittoria-Stazione;Bahnhof-Siegesplatz-Baristr.-Emeristr.-Baristr.-Siegesplatz-Bahnhof;Bolzano-Bozen;3;3;603;703;3
+10;3 BZ;3 Bolzano;3 Bozen;Stazione-Piazza Mazzini-Via Bari-Via Emeri-Via Bari-Piazza Mazzini-Stazione;Bahnhof-Mazziniplatz-Baristr.-Emeristr.-Baristr.-Mazziniplatz-Bahnhof;Bolzano-Bozen;3 Sabato;3 Samstag;693;793;3
+11;4 BZ;4 Bolzano;4 Bozen;Stazione-Via Volta-Via Einstein-Pineta-Via Volta-Via Lancia-Stazione;Bahnhof-Voltastr.- Einsteinstr.-Steinmannwald-Voltastr.-Lanciastr.-Bahnhof;Bolzano-Bozen;4;4;604;704;4
+12;4 BZ;4 Bolzano;4 Bozen;Stazione-Via Volta-Via Einstein-Pineta-Via Volta-Via Lancia-Stazione;Bahnhof-Voltastr.- Einsteinstr.-Steinmannwald-Voltastr.-Lanciastr.-Bahnhof;Bolzano-Bozen;4 Sabato;4 Samstag;694;794;4
+13;4 BZ;4 Bolzano;4 Bozen;Stazione-Via Lancia-Via Einstein-Pineta-Via Lancia-Stazione;Bahnhof-Lanciastr.- Einsteinstr.-Steinmannwald-Lanciastr.-Bahnhof;Bolzano-Bozen;4 Estate;4 Sommer;;;4
+14;5 BZ;5 Bolzano;5 Bozen;Stazione-Via Palermo-V.le Europa-Via Mozart-V.le Europa-Via Palermo-Stazione;Bahnhof-Palermostr.-Europaallee-Mozartstr.-Europaallee-Palermostr.-Bahnhof ;Bolzano-Bozen;5;5;605;705;5
+15;6 BZ;6 Bolzano;6 Bozen;Via Perathoner-V.le Europa-Via Braille-V.le Europa-Via Perathoner;Perathonerstr.-Europaallee-Braillestr.-Europaallee-Perathonerstr.;Bolzano-Bozen;6;6;606;706;6
+16;6 BZ;6 Bolzano;6 Bozen;Linea. scolastica: Stazione-Viale Druso-Via Resia;Schuelerfahrt: Bahnhof-Drususallee-Reschenstr.;Bolzano-Bozen;6 Scol.;6 S.;;;6
+17;7A BZ;7A Bolzano;7A Bozen;Pass.dei Castani-Via Perathoner-Via Roma-Pass. dei Castani;Koestenweg-Perathonerstr.-Romstr.-Koestenweg;Bolzano-Bozen;7A ;7A;707;;7A
+18;7A BZ;7A Bolzano;7A Bozen;Pass.dei Castani-Via Perathoner-Via Roma-Pass. dei Castani;Koestenweg-Perathonerstr.-Romstr.-Koestenweg;Bolzano-Bozen;7A Sabato;7A Samstag;797;;7A
+19;7B BZ;7B Bolzano;7B Bozen;Pass.dei Castani-Via Roma-Via Perathoner-Pass. dei Castani;Koestenweg-Romstr.-Perathonerstr.-Koestenweg;Bolzano-Bozen;7B ;7B;607;;7B
+20;7B BZ;7B Bolzano;7B Bozen;Pass.dei Castani-Via Roma-Via Perathoner-Pass. dei Castani;Koestenweg-Romstr.-Perathonerstr.-Koestenweg;Bolzano-Bozen;7B Sabato;7B Samstag;697;;7B
+21;8 BZ;8 Bolzano;8 Bozen;P.zza Dogana-Stazione-Via C. Battisti-Ospedale BZ-Via C. Battisti-P.zza Dogana;Zollstange-Bhf.-Battisti-Str.-Drususstr.-Krankenhaus-Drususstr.-Battisti-Str.-Zollstange;Bolzano-Bozen;8;8;608;708;8
+22;8 BZ;8 Bolzano;8 Bozen;P.zza Dogana-Stazione-P.zza Mazzini-Ospedale BZ-P.zza Mazzini-P.zza Dogana;Zollstange-Bhf.-Mazziniplatz-Drususstr.-Krankenhaus-Drususstr.-Mazziniplatz-Zollstange;Bolzano-Bozen;8 Sabato;8 Samstag;698;798;8
+23;9 BZ;9 Bolzano;9 Bozen;Via Perathoner-V.le Druso-Firmian-Ponte Adige Stazione-Firmian-V.le Druso-Via Perathoner;Perathonerstr.-Drususstr.-Firmian-Sigmundskron Bhf.-Firmian-Drususstr.-Perathonerstr.;Bolzano-Bozen;9;9;609;709;9
+24;10A BZ;10A Bolzano;10A Bozen;Ospedale -Cimitero-Stazione-Ospedale;Krankenhaus-Friedhof- Bahnhof - Krankenhaus;Bolzano-Bozen;10A;10A;610;;10A
+25;10B BZ;10B Bolzano;10B Bozen;Ospedale-Cimitero-Stazione-Ospedale;Krankenhaus-Bahnhof-Friedhof-Krankenhaus;Bolzano-Bozen;10B;10B;710;;10B
+26;11 BZ;11 Bolzano;11 Bozen;Via Perathoner-Funivia Renon-Piani di Bolzano-Via Perathoner;Perathonerstr.-Rittner Seilbahn-Bozner Boden-Perathonerstr.;Bolzano-Bozen;11;11;611;;11
+27;12 BZ;12 Bolzano;12 Bozen;Via Perathoner-Funivia S. Genesio-Via Perathoner;Perathonerstr.-Seilbahn Jenesien-Perathonerstr.;Bolzano-Bozen;12;12;612;;12
+28;13 BZ;13 Bolzano;13/183 Bozen;Bolzano-Campiglio-Cardano Zona Artigianale-Campiglio-Bolzano;Bozen-Kampill-Kardaun Handwerkerzone-Kampill-Bozen;Bolzano-Bozen;13;13;613;713;13
+29;13 BZ;13 Bolzano;13/183 Bozen;Bolzano-Cardano-Cornedo-Cardano-Bolzano;Bozen-Kardaun-Karneid-Kardaun-Bozen;Bolzano-Bozen;183;183;183;183;13
+30;14 BZ;14 Bolzano;14 Bozen;Pass. dei Castani-Funivia Renon-Funivia S. Genesio-Funivia Renon-Pass. dei Castani;Koestenweg-Rittner Seilbahn-Seilbahn Jenesien-Rittner Seilbahn-Koestenweg;Bolzano-Bozen;14;14;614;714;14
+31;153 BZ;153 Bolzano Linea Serale;153 Bozen Abendlinie;Stazione-Via Fago-Piazza Gries-Via Resia-Via Emeri-Via Roma-Stazione ;Bahnhof-Fagenstr.-Grieserplatz-Reschenstr.-Emeristr.-Romstr.-Bahnhof;Bolzano-Bozen;153;153;615;;153
+32;153 BZ;153 Bolzano;153 Bozen;Stazione-Gries-Novacella-Europa-Don Bosco-Casanova-Don Bosco-Novacella-Stazione ;Bahnhof-Gries-Neustift-Europa-Don Bosco-Casanova-Don Bosco-Neustift-Bahnhof ;Bolzano-Bozen;153 Sabato;153 Samstag;620;;153
+33;INT_LAIV;112 Interna Laives;112 Leifers;Laives Stazione-Laives-Pineta-Laives-Laives Stazione;Leifers Bhf-Leifers-Steinmannwald-Leifers-Leifers Bhf;Bolzano-Bozen;112;112;16;17;112
+34;VAD_LAIV;113 Vadena Laives;113 Pfatten Leifers;Laives Stazione-Laives-Vadena-Laives-Laives Stazione;Leifers Bhf-Leifers-Pfatten-Leifers-Leifers Bhf;Bolzano-Bozen;113;113;5547;5553;113
+35;VAD_LAIV;113 Vadena Laives;113 Pfatten Leifers;Laives Stazione-via Sottomonte-Laives Stazione;Leifers Bhf-Unterbergstr.-Leifers Bhf;Bolzano-Bozen;113 Laives;113 Leifers;15;;113
+36;NALLES;202 Citybus Nalles;202 Citybus Nals;Vilpiano-Nalles-Andriano-Terlano-Andriano-Nalles-Vilpiano;Vilpian-Nals-Andrian-Terlan-Andrian-Nals-Vilpian;Bolzano-Bozen;202 CB;202 CB;5542;5541;202
+37;NALLES;202 Nalles;202 Nals;Nalles-Andriano-Terlano-Bolzano;Nals-Andrian-Terlan-Bozen;Bolzano-Bozen;202;202;;5503;202
+38;1 ME;1 Merano;1 Meran;S. Maria Assunta-Giardino Botanico-Funivia Merano 2000-Maria Assunta;M. Himmelfahrt-Botanischer Garten-Seilbahn Meran 2000-M. Himmelfahrt;Merano-Meran;1;1;8;80;1
+39;1 ME;1 Merano;1 Meran;S. Maria Assunta-Funivia Merano 2000-S. Maria Assunta;M. Himmelfahrt-Seilbahn Meran 2000-M. Himmelfahrt;Merano-Meran;1A;1A;1;10;1
+40;1 ME;1 Merano;1 Meran;S. Maria Assunta-Giardino Botanico-S. Maria Assunta;M. Himmelfahrt-Botanischer Garten-M. Himmelfahrt;Merano-Meran;1B;1B;7;70;1
+41;2 ME;2/2A Merano;2/2A Meran;Merano Stazione-Sinigo-Merano Stazione;Meran Bhf-Sinich-Meran Bhf;Merano-Meran;2;2;2;20;2
+42;2 ME;2/2A Merano;2/2A Meran;Merano Stazione-Sinigo-Postal Stazione-Sinigo-Merano Stazione;Meran Bhf-Sinich-Burgstall Bhf-Sinich-Meran Bhf;Merano-Meran;2A;2A;27;28;2
+43;2 ME;2/2A Merano;2/2A Meran;Linea. scolastica: Merano Centrol Scol.-Meran Stazione-Sinigo-Postal Stazione-Sinigo-Merano Centrol Scol.-Meran Stazione;Schuelerfahrt: Meran Schulzentrum-Meran Bhf-Sinich-Burgstall Bhf-Sinich-Meran Schulzentrum-Meran Bhf;Merano-Meran;2A Scol.;2A S.;;;2
+44;3 ME;3 Merano;3 Meran;Stazione-P.zza Fontana-Via Virgilio-P.zza Fontana-F.te San Martino-Stazione;Bahnhof-Brunnenplatz-Vergilstr.-Brunnenplatz-Rennweg-Martinsbrunn-Bahnhof;Merano-Meran;3;3;3;33;3
+45;4 ME;4 Merano;4 Meran;Ospedale-Via Innerhofer-Giardino Botanico-Via Dante-Ospedale;Krankenhaus-Innerhoferstr.-Botanischer Garten-Dantestr.-Krankenhaus;Merano-Meran;4;4;4;40;4
+46;6 ME;6 Merano;6 Meran;Via A. Hofer-Via d.Corse-Via E.Toti-Via Wolkenstein-Via Marlengo-Via A. Hofer;Hoferstr.-Rennweg-E. Toti-Str. -Wolkensteinstr.-Zueggstr.Marlingerstr.-A. Hoferstr.;Merano-Meran;6;6;6;61;6
+47;6 ME;6 Merano;6 Meran;Via A. Hofer-Via d.Corse-Via E.Toti-Via Wolkenstein-Via Marlengo-Via A. Hofer;Hoferstr.-Rennweg-E. Toti-Str. -Wolkensteinstr.-Zueggstr.Marlingerstr.-A. Hoferstr.;Merano-Meran;6 (via Via K.Wolf);6 (ueber K.Wolf Str.);6;60;6
+48;6 ME;6 Merano;6 Meran;Via A. Hofer-Via d.Corse-Via E.Toti-Via Wolkenstein-Via Marlengo-Via A. Hofer-Ospedale;Hoferstr.-Rennweg-E. Toti-Str. -Wolkensteinstr.-Zueggstr.Marlingerstr.-A. Hoferstr.-Krankenhaus;Merano-Meran;6 Festivi  ;6 Sonn- und Feiertage;62;61;6
+49;146 ME;146 Merano Linea Serale;146 Meran Abendlinie;Ospedale-Maia Alta-Lazago-Rione Marlengo-Rione M.Assunta-Ospedale ;Krankenhaus-Obermais-Lazag-Marlinger Steig-M. Himmelfahrt-Krankenhaus ;Merano-Meran;146;146;146;;146
+50;BZ-ME;201 Bolzano-Merano;201 Bozen-Meran;Merano-Terlano-Bolzano-Terlano-Merano;Meran-Terlan-Bozen-Terlan-Meran;Merano-Meran;201;201;5504;5504;201
+51;BZ-ME;201 Bolzano-Merano;201 Bozen-Meran;Sinigo-Terlano-Bolzano;Sinich-Terlan-Bozen;Merano-Meran;201 da Sinigo;201 ab Sinich;5515;;201
+52;BZ-ME;201 Bolzano-Merano;201 Bozen-Meran;Bolzano-Terlano-zona sportiva Vilpiano;Bozen-Terlan-Sportzone Vilpian;Merano-Meran;201 per ZS Vilpiano;201 bis SZ Vilpian;;5528;201
+53;BZ-ME;201 Bolzano-Merano;201 Bozen-Meran;Maia Bassa Stazione-Terlano- Bolzano (per Viale Druso);Untermais Bhf-Terlan-Bozen (ueber Drususallee);Merano-Meran;201 da Maia Bassa Staz.;201 ab Untermais Bhf.;5604;;201
+54;BZ-ME;201 Bolzano-Merano;201 Bozen-Meran;Merano-Terlano-Bolzano (per Viale Druso)-Terlano-Merano;Meran-Terlan-Bozen (ueber Drususallee)-Terlan-Meran;Merano-Meran;201 via Druso;201 Drususallee;5704;5698;201
+55;11 ME;211 Merano;211 Meran;Merano-Marlengo-Cermes-Lana-Postal Stazione-Lana-Cermes-Marlengo-Merano;Meran-Marling-Tscherms-Lana-Burgstall Bhf-Lana-Tscherms-Marling-Meran;Merano-Meran;211;211;5611;5611;211
+56;11 ME;211 Merano;211 Meran;Merano-Marlengo-Cermes-Lana-Postal Stazione-Lana-Cermes-Marlengo-Merano;Meran-Marling-Tscherms-Lana-Burgstall Bhf-Lana-Tscherms-Marling-Meran;Merano-Meran;211 A;211 A;5602;5602;211
+57;11 ME;211 Merano;211 Meran;Merano-Marlengo-Cermes-Lana-Cermes-Marlengo-Merano;Meran-Marling-Tscherms-Lana-Tscherms-Marling-Meran;Merano-Meran;211 B;211 B;5601;5601;211
+58;11 ME;211 Merano;211 Meran;Merano-Marlengo-Cermes-Lana-Cermes-Marlengo-Merano;Meran-Marling-Tscherms-Lana-Tscherms-Marling-Meran;Merano-Meran;211 C;211 C;5608;5608;211
+59;11 ME;211 Merano;211 Meran;Linea. scolastica: Lagundo - Merano-Marlengo-Cermes-Lana;Schuelerfahrt: Algund - Meran-Marling-Tscherms-Lana;Merano-Meran;211 Scol.;211 S.;;;211
+60;12 ME;212 Merano;212 Meran;Foresta-Merano-Marlengo-Merano-Foresta;Forst-Meran-Marling-Meran-Forst;Merano-Meran;212;212;5634;5636;212
+61;12 ME;212 Merano;212 Meran;Foresta-Merano-Marlengo-Merano-Foresta ;Forst-Meran-Marling-Meran-Forst;Merano-Meran;212 A;212 A;5619;5620;212
+62;12 ME;212 Merano;212 Meran;Linea. scolastica: Maia Bassa Bhf-Marlengo-Lagundo-Marlengo-Maia Bassa Bhf;Schuelerfahrt: Untermais Bhf-Marling-Algund-Marling-Untermais Bhf;Merano-Meran;212 Scol.;212 S.;;;212
+63;13 ME;213 Merano;213 Meran;Merano-Lagundo-Parcines-Lagundo-Merano;Meran-Algund-Partschins-Algund-Meran;Merano-Meran;213;213;5613;5613;213
+64;14 ME;214 Merano;214 Meran;Sinigo Zona Artigianale-Zona Ind.-Lana-Foiana-Z.industr. Lana-Sinigo Zona Artigianale;Sinich Hanwerkerzone-Industriezone-Lana-Voellan-Lana-Industriezone Lana-Sinich Hanwerkerzone;Merano-Meran;214;214;5614;5614;214
+65;14 ME;214 Merano;214 Meran;Linea scolastica: Foiana-Lana-Merano  ;Schuelerfahrt: Voellan-Lana-Meran;Merano-Meran;214 Scol.;214 S.;5632;5632;214
+66;CITY LA;215 Citybus Lana;215 Citybus Lana;Lana Villa-Postal Stazione-Lana Villa;Lana Villa-Burgstall Bhf.-Lana Villa;Merano-Meran;215;215;5610;5615;215
+67;CITY LA;215 Citybus Lana;215 Citybus Lana;Lana Autostazione-Lana di Sotto-Lana Autosazione;Lana Busbhf.-Niederlana-Lana Busbhf.;Merano-Meran;215 Lana di Sotto;215 Niederlana;5616;5617;215
+68;CITY LA;215 Citybus Lana;215 Citybus Lana;Foiana-Lana Autostazione-Postal Stazione-Lana Autostazione-Foiana;Voellan-Lana-Burgstall-Lana-Voellan;Merano-Meran;215 Sa.Pom./Do. ;215 Sa.Nachmittag/So.;5621;5621;215
+69;CITY LA;215 Citybus Lana;215 Citybus Lana;Lana Autostazione-Lana di Sotto-Postal Stazione-Lana di Sotto-Lana Autostazione;Lana Busbhf.-Niederlana-Burgstall Bhf-Niederlana-Lana Busbhf.;Merano-Meran;215 Sa.Pom./Do.;215 Sa.Nachmittag/So.;5610;5623;215
+70;CITY LA;215 Citybus Lana;215 Citybus Lana;Lana Autostazione-Postal Stazione (per Via Bolzano);Lana Busbhf.-Burgstall Bhf (ueber Boznerstr.);Merano-Meran;215 via Via Bolzano;215 ueber Boznerstr.;;5622;215
+71;TIROLO;221 Tirolo;221 Tirol;Merano-Tirolo-Merano;Meran-Dorf Tirol-Meran;Merano-Meran;221;221;5501;5501;221
+72;CROCE T;222 Tirolo Croce;222 Tiroler Kreuz;Tirolo Croce-Tirolo-Monte Benedetto-Tirolo-Tirolo Croce;Tiroler Kreuz-Dorf Tirol Segenbuehel-Dorf Tirol-Tiroler Kreuz;Merano-Meran;222;222;5502;5502;222
+73;ZEN-FIN;223 Zenoburg Finale;223 Zenoburg Finele;Tirolo-Finale-via Aica-Tirolo;Dorf Tirol-Finele-Aichweg-Dorf Tirol;Merano-Meran;223;223;3001;;223
+74;VERNURIO;224 Vernurio;224 Vernuer;Vernurio-Rifiano-Tirolo- Rifiano-Vernurio;Vernuer-Riffian-Dorf Tirol-Riffian-Vernuer;Merano-Meran;224;224;1616;1616;224
+75;VERNURIO;224 Vernurio;224 Vernuer;Caines Sonngarten-Vernurio-Caines Sonngarten;Kuens Sonngarten-Vernuer-Kuens Sonngarten;Merano-Meran;224 da Sonngarten;224 ab Sonngarten;5519;5519;224
+76;VERNURIO;224 Vernurio;224 Vernuer;Vernurio-Rifiano-Caines Sonngarten-Tirolo-Rifiano-Vernurio;Vernuer-Riffian-Kuens Sonngarten-Dorf Tirol-Riffian-Vernuer;Merano-Meran;224 V-T-V per Sonngarten;225 V-T-V ueber Sonngarten;;;224
+77;ME-AV;225 Merano Avelengo Falzeben/Verano;225 Meran Hafling Falzeben/Voeran;Merano Stazione-Avelengo-Falzeben-Avelengo-Merano Stazione;Meran Bahnhof-Hafling-Falzeben-Hafling-Meran Bahnhof;Merano-Meran;225;225;5505;5505;225
+78;ME-AV;225 Merano Avelengo Falzeben/Verano;225 Meran Hafling Falzeben/Voeran;Avelengo-Falzeben-Avelengo;Hafling-Falzeben-Hafling;Merano-Meran;225 Av-Falz;225 Haf-Falz;5507;5507;225
+79;ME-AV;225 Merano Avelengo Falzeben/Verano;225 Meran Hafling Falzeben/Voeran;Merano Stazione-Avelengo-Verano-Avelengo-Merano Stazione;Meran Bahnhof-Hafling-Voeran-Hafling-Meran Bahnhof;Merano-Meran;225 Verano;225 Voeran;5529;5529;225
+80;ME-AV;225 Merano Avelengo Falzeben/Verano;225 Meran Hafling Falzeben/Voeran;Avelengo-Verano-Avelengo;Hafling-Voeran-Hafling;Merano-Meran;225 Ver-Av;225 Haf-Voeran;5518;5518;225
+81;NIGHTSH;231 Nightshuttle;231 Nightshuttle;Verdines-Merano-Gargazzone-Lana-Lagundo-Merano;Verdins-Meran-Gargazon-Lana-Algund-Meran;Merano-Meran;231 da Verdines;231 ab Verdins;5731;;231
+82;NIGHTSH;231 Nightshuttle;231 Nightshuttle;Merano-Gargazzone-Lana-Lagundo-Merano;Verdins-Meran-Gargazon-Lana-Algund-Meran;Merano-Meran;231;231;5732;;231
+83;NIGHTSH;231 Nightshuttle;231 Nightshuttle;Merano-Gargazzone-Lana-Lagundo-Merano-Verdines;Meran-Gargazon-Lana-Algund-Meran-Verdins;Merano-Meran;231 a Verdines;231 bis Verdins;5733;;231
+84;SKIBUS;SKIBUS Merano;SKIBUS Meran;Avelengo - S. Caterina - Falzeben;Hafling - St. Kathrein - Falzeben;Merano-Meran;SKI Avelengo;SKI Hafling;5526;;SKI
+85;SKIBUS;SKIBUS Merano;SKIBUS Meran;H. Viktoria - Falzeben;H. Viktoria - Falzeben;Merano-Meran;SKI Viktoria;SKI Viktoria;5510;;SKI
+86;SKIBUS;SKIBUS Merano;SKIBUS Meran;Brunnerhof - Falzeben;Brunnerhof - Falzeben;Merano-Meran;SKI Brunner;SKI Brunner;5512;;SKI
+87;SKIBUS;SKIBUS Merano;SKIBUS Meran;H. Sonneheim - Falzeben;H. Sonneheim - Falzeben;Merano-Meran;SKI Sonnenheim;SKI Sonnenheim;5511;;SKI

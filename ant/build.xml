@@ -1,0 +1,1178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="info" basedir="../" name="sasa2gtfs">
+	<xmlproperty file="./ant/properties.xml" />
+	<!--xmlproperty file="./ant/properties.xml" semanticattributes="true" includesemanticattribute="true" /-->
+	<path id="project.classpath">
+		<fileset dir="${properties.project.libDir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<pathelement path="${properties.project.classDir}" />
+	</path>
+
+	<!-- for ant contrib -->
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="${properties.project.libDir}/ant-contrib-1.0b3.jar" />
+		</classpath>
+	</taskdef>
+	<!-- end of for ant contrib -->
+
+	<!-- Global properties -->
+	<property name="SQLFile" value="script.sql" />
+
+	<target name="info">
+		<!--only public targets shall be listed here-->
+		<echo>ant deploy --> Deploys the project as a web application.</echo>
+		<echo>ant sasa2gtfsWebApp --> Deploys the project as a web application.</echo>
+		<echo>ant sasa2gtfs --> Converts the files of sasa in gtfs </echo>
+		<echo>ant gtfs2isochrones --> Converts the gtfs tables in isochrone required format.</echo>
+		<echo>ant fetchDataFromWeb --> Download new data from sasa and creates a zip file.</echo>
+
+	</target>
+
+	<!-- ================================= 
+          target: deploy              
+         ================================= -->
+	<target name="deploy" description="Deploys the project as a web application.">
+		<property name="htmlSrcPath" value="${properties.scripts.htmlSourcesPath}" />
+
+
+		<delete dir="./src/main/resources/ant" />
+		<delete dir="./src/main/resources/data" />
+		<delete file="${properties.webapp.path}/index.html" />
+		<delete file="${properties.webapp.path}/header.png" />
+		<delete file="${properties.webapp.path}/style1.css" />
+		<delete file="${properties.webapp.path}/output.html" />
+		<!-- Creating the input html file -->
+		<copy file="${htmlSrcPath}/index.html" tofile="${htmlSrcPath}/tmp.html">
+			<filterchain>
+				<replacetokens>
+					<token key="hostname" value="${properties.webapp.hostname}" />
+					<token key="port" value="${properties.webapp.port}" />
+					<token key="projectName" value="${properties.webapp.projectName}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<copy file="${htmlSrcPath}/tmp.html" tofile="${properties.webapp.path}/index.html" />
+		<copy file="${htmlSrcPath}/header.png" tofile="${properties.webapp.path}/header.png" />
+		<copy file="${htmlSrcPath}/style1.css" tofile="${properties.webapp.path}/style1.css" />
+		<delete file="${htmlSrcPath}/tmp.html" />
+		<!-- Creating the output html file displaying notification message -->
+		<copy file="${htmlSrcPath}/output.html" tofile="${htmlSrcPath}/tmp.html">
+			<filterchain>
+				<replacetokens>
+					<token key="hostname" value="${properties.webapp.hostname}" />
+					<token key="port" value="${properties.webapp.port}" />
+					<token key="projectName" value="${properties.webapp.projectName}" />
+					<token key="feedName" value="${properties.project.outputFile}" />
+					<token key="email" value="${properties.webapp.email.toAddress}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<copy file="${htmlSrcPath}/tmp.html" tofile="${properties.webapp.path}/output.html" />
+		<delete file="${htmlSrcPath}/tmp.html" />
+		<copy todir="./src/main/resources/ant/">
+			<fileset dir="./ant/" />
+		</copy>
+		<copy todir="./src/main/resources/data/">
+			<fileset dir="./data/" />
+		</copy>
+	</target>
+
+	<!-- ================================= 
+		          target: sasa2gtfs              
+		         ================================= -->
+	<target name="sasa2gtfs" depends="init" description="Starts the convertion running from shell">
+		<antcall target="unzip" />
+		<antcall target="migrate" />
+		<antcall target="initPostFunctions" />
+		<antcall target="complete" />
+		<antcall target="exportTables" />
+		<antcall target="zipFeed" />
+		<antcall target="terminate" />
+	</target>
+
+	<!-- ================================= 
+			          target: sasa2gtfsWebApp              
+			         ================================= -->
+	<target name="sasa2gtfsWebApp" description="Starts the convertion invoked from the servlet">
+		<antcall target="unzip" />
+		<antcall target="migrate" />
+		<antcall target="initPostFunctions" />
+		<antcall target="complete" />
+		<antcall target="exportTables" />
+		<antcall target="zipFeed" />
+		<antcall target="terminate" />
+	</target>
+
+	<target name="init" depends="clean,initSQLFunctions">
+		<antcall target="compile">
+			<!--param name="classDestinationDir" value="classes"/-->
+		</antcall>
+	</target>
+
+	<!--target name="terminate" depends="dropTables"-->
+	<target name="terminate">
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+       target: unzips csv file                      
+      - - - - - - - - - - - - - - - - - -->
+	<target name="unzip">
+		<echo>Unzipping csv files to directory ${properties.project.inputPath}.</echo>
+		<delete>
+			<fileset dir="${properties.project.inputPath}">
+				<exclude name="**.zip" />
+			</fileset>
+		</delete>
+		<unzip src="${properties.project.inputPath}/${properties.project.inputFile}" dest="${properties.project.inputPath}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+       target: zipFeed                      
+      - - - - - - - - - - - - - - - - - -->
+	<target name="zipFeed">
+		<echo>Zipping the txt files into the file ${properties.project.outputPath}/${properties.project.outputFile}</echo>
+		<delete file="${properties.project.outputPath}/${properties.project.outputFile}" />
+		<zip destfile="${properties.project.outputPath}/${properties.project.outputFile}">
+			<fileset dir="${properties.project.outputPath}" includes="**.txt" />
+		</zip>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+       target: compile Project                      
+      - - - - - - - - - - - - - - - - - -->
+	<target name="compile" depends="clean">
+		<mkdir dir="${properties.project.classDir}" />
+		<echo message="Compiling Project" level="info" />
+		<property name="classDestinationDir" value="${properties.project.classDir}" />
+		<javac srcdir="${properties.project.srcDir}" destdir="${classDestinationDir}" classpathref="project.classpath" verbose="true" failonerror="true" debug="on" source="1.6">
+			<classpath>
+				<fileset dir="${properties.project.libDir}">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+		</javac>
+	</target>
+
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+		       target: clean                      
+	 - - - - - - - - - - - - - - - - - -->
+	<target name="clean">
+		<delete dir="${properties.project.classDir}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+		       target: createBusLinks                    
+		      - - - - - - - - - - - - - - - - - -->
+	<target name="createBusLinks">
+		<property name="SQLFile" value="script.sql" />
+		<echo>Creating bus link table. This may take 5 minutes.... </echo>
+		<copy file="${properties.scripts.mergePath}/createBuslinks.sql" tofile="${properties.scripts.mergePath}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="BUS_LINK_TABLE" value="${properties.tables.busLinks}" />
+					<token key="STOPTIMES_TABLE" value="${properties.tables.stoptimes}" />
+					<token key="TRIPS_TABLE" value="${properties.tables.trips}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.mergePath}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.mergePath}/${SQLFile}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+			       target: createMapping                    
+			      - - - - - - - - - - - - - - - - - -->
+	<target name="createMapping">
+		<property name="SQLFile" value="script.sql" />
+		<echo>Creating the mapping table. This may take 5 minutes.... </echo>
+		<copy file="${properties.scripts.mergePath}/createMapping.sql" tofile="${properties.scripts.mergePath}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="MAPPING_TABLE" value="${properties.tables.mapping}" />
+					<token key="BUS_STOPS" value="${properties.tables.stops}" />
+					<token key="PED_LINKS" value="${properties.tables.pedLinks}" />
+					<token key="DISTANCE_TOLERANCE" value="${properties.tools.mergeNw.distancetolerance}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<loadfile property="message" srcFile="${properties.scripts.mergePath}/${SQLFile}" />
+		<echo>${message}</echo>
+		<exec dir="${properties.scripts.mergePath}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.mergePath}/${SQLFile}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+			       target: mergeTables                    
+			      - - - - - - - - - - - - - - - - - -->
+	<target name="mergeTables">
+		<property name="tableName" value="TMP_STOPTIMES" />
+		<java classname="it.unibz.inf.dis.sasa2gtfs.utils.MergedNetworkGenerator" fork="true" classpathref="project.classpath">
+			<arg value="username=${properties.database.user}" />
+			<arg value="password=${properties.database.password}" />
+			<arg value="url=${properties.database.url}" />
+			<arg value="sid=${properties.database.sid}" />
+			<arg value="port=${properties.database.port}" />
+			<arg value="pedLinkTable=${properties.tables.pedLinks}" />
+			<arg value="busLinkTable=${properties.tables.busLinks}" />
+			<arg value="tripTable=${properties.tables.trips}" />
+			<arg value="mappingTable=${properties.tables.mapping}" />
+			<arg value="destLinkTable=${properties.tables.destLinks}" />
+			<arg value="destNodeTable=${properties.tables.destNodes}" />
+			<arg value="dimension1Element=${properties.tools.mergeNw.dimension1Element}" />
+			<arg value="dimension2Element=${properties.tools.mergeNw.dimension2Element}" />
+			<arg value="srid=${properties.tools.mergeNw.srid}" />
+		</java>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+				       target: createSchedule                    
+				      - - - - - - - - - - - - - - - - - -->
+	<target name="createSchedule">
+		<property name="SQLFile" value="script.sql" />
+		<echo>Creating the (optimized) schedule table.... </echo>
+		<copy file="${properties.scripts.mergePath}/createSchedules.sql" tofile="${properties.scripts.mergePath}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="SCHEDULE_TABLE" value="${properties.tables.schedules}" />
+					<token key="STOPTIMES_TABLE" value="${properties.tables.stoptimes}" />
+					<token key="LINK_TABLE" value="${properties.tables.destLinks}" />
+					<token key="TRIP_TABLE" value="${properties.tables.trips}" />
+					<token key="CALENDAR_TABLE" value="${properties.tables.calendar}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<loadfile property="message" srcFile="${properties.scripts.mergePath}/${SQLFile}" />
+		<echo>${message}</echo>
+		<exec dir="${properties.scripts.mergePath}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.mergePath}/${SQLFile}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+				private target: initSQLFunctions                
+	    - - - - - - - - - - - - - - - - - -->
+	<target name="initSQLFunctions">
+		<echo>Initializing sql functions.... </echo>
+		<echo>Creating function string2timestamp .... </echo>
+		<property name="SQLFile" value="string2timestamp.sql" />
+		<exec dir="${properties.scripts.functionPath}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+			private target: initPostFunctions                
+    - - - - - - - - - - - - - - - - - -->
+	<target name="initPostFunctions" description="Must be invoked after the migration of the tables">
+		<property name="func1File" value="timestamp2string.sql" />
+		<property name="SQLFile" value="createFunctions.sql" />
+		<echo>Creating function timestamp2string .... </echo>
+		<copy file="${properties.scripts.functionPath}/${func1File}" tofile="${properties.scripts.functionPath}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="TABLE_NAME" value="${properties.tables.stoptimes(tmp)}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.functionPath}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.functionPath}/${SQLFile}" />
+		<property name="func2File" value="timestamp2secondsaftermidnight.sql" />
+		<property name="SQLFile" value="createFunctions.sql" />
+		<echo>Creating function timestamptosecaftermidnight .... </echo>
+		<copy file="${properties.scripts.functionPath}/${func2File}" tofile="${properties.scripts.functionPath}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="TABLE_NAME" value="${properties.tables.stoptimes(tmp)}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.functionPath}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.functionPath}/${SQLFile}" />
+	</target>
+
+	<!-- ================================= 
+    target: migrate, migrates the data by creating table and importing the data with sql loader             
+ 	================================= -->
+	<target name="migrate" depends="migrateRoutes,migrateStops,migrateTrips,migrateStoptimes,migrateCalendar" description="description" />
+
+	<!-- ================================= 
+	    target: complete, complete the missing columns by putting them in a new table             
+	 	================================= -->
+	<target name="complete" depends="initPostFunctions" description="description">
+		<antcall target="completeTrips" />
+		<antcall target="completeRoutes" />
+		<antcall target="completeStoptimes" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: completeTrips                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="completeTrips">
+		<property name="origFile" value="trips.sql" />
+		<property name="SQLFile" value="completeTrips.sql" />
+		<echo>Creating trips table ${properties.tables.trips} .... </echo>
+		<copy file="${properties.scripts.complitionPath}/${origFile}" tofile="${properties.scripts.complitionPath}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="TABLE_NAME" value="${properties.tables.trips}" />
+					<token key="TMP_TRIPS_TABLE" value="${properties.tables.trips(tmp)}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.complitionPath}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.complitionPath}/${SQLFile}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: completeStoptimes                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="completeStoptimes">
+		<property name="origFile" value="stoptimes.sql" />
+		<property name="SQLFile" value="completeStoptimes.sql" />
+		<echo>Creating stoptimes table ${properties.tables.stoptimes} .... </echo>
+		<copy file="${properties.scripts.complitionPath}/${origFile}" tofile="${properties.scripts.complitionPath}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="TABLE_NAME" value="${properties.tables.stoptimes}" />
+					<token key="TMP_TABLE_NAME" value="${properties.tables.stoptimes(tmp)}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.complitionPath}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.complitionPath}/${SQLFile}" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: completeRoutes                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="completeRoutes">
+		<property name="origFile" value="routes.sql" />
+		<property name="SQLFile" value="completeRoutes.sql" />
+		<echo>Creating routes table ${properties.tables.routes} .... </echo>
+		<copy file="${properties.scripts.complitionPath}/${origFile}" tofile="${properties.scripts.complitionPath}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="TABLE_NAME" value="${properties.tables.routes}" />
+					<token key="TMP_TABLE_NAME" value="${properties.tables.routes(tmp)}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.complitionPath}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.complitionPath}/${SQLFile}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+		target: migrateStoptimes                   
+    - - - - - - - - - - - - - - - - - -->
+
+	<target name="migrateStoptimes" description="migrates the stoptimes">
+		<echo>Migrating data into table ${properties.tables.stoptimes(tmp)} </echo>
+		<antcall target="createTable">
+			<param name="tableName" value="${properties.tables.stoptimes(tmp)}" />
+			<param name="templateSQLFile" value="stoptimes.sql" />
+		</antcall>
+		<antcall target="loadData">
+			<param name="tableName" value="${properties.tables.stoptimes(tmp)}" />
+			<param name="templateCtrlFile" value="stoptimes.ctrl" />
+			<param name="sourceFile" value="${properties.project.inputPath}/orariPassaggio.csv" />
+			<param name="headerFile" value="header_stoptimes.txt" />
+		</antcall>
+		<!-- correction follows here follows here -->
+		<antcall target="correctStoptimes">
+			<param name="tableName" value="${properties.tables.stoptimes(tmp)}" />
+		</antcall>
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+			target: migrateRoutes                  
+	    - - - - - - - - - - - - - - - - - -->
+	<target name="migrateRoutes" description="migrates the TMP_SASA_ROUTES Table">
+		<echo>Migrating data into table ${properties.tables.routes(tmp)} </echo>
+		<antcall target="createTable">
+			<param name="tableName" value="${properties.tables.routes(tmp)}" />
+			<param name="templateSQLFile" value="routes.sql" />
+		</antcall>
+		<antcall target="loadData">
+			<param name="tableName" value="${properties.tables.routes(tmp)}" />
+			<param name="templateCtrlFile" value="routes.ctrl" />
+			<param name="sourceFile" value="${properties.project.inputPath}/linee.csv" />
+		</antcall>
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+				target: migrateTrips                   
+		    - - - - - - - - - - - - - - - - - -->
+	<target name="migrateTrips" description="migrates the TMP_SASA_TRIPS Table">
+		<echo>Migrating data into table ${properties.tables.trips(tmp)} </echo>
+		<antcall target="createTable">
+			<param name="tableName" value="${properties.tables.trips(tmp)}" />
+			<param name="templateSQLFile" value="trips.sql" />
+		</antcall>
+		<antcall target="loadData">
+			<param name="tableName" value="${properties.tables.trips(tmp)}" />
+			<param name="templateCtrlFile" value="trips.ctrl" />
+			<param name="sourceFile" value="${properties.project.inputPath}/lineeCorse.csv" />
+			<param name="headerFile" value="header_trips.txt" />
+		</antcall>
+		<antcall target="referenceRouteId">
+			<param name="templateSQLFile" value="update_trips.sql" />
+		</antcall>
+	</target>
+
+	<target name="referenceRouteId" description="Updates in the trips table the route id">
+		<property name="templateSQLFile" value="@setme" />
+		<property name="SQLFile" value="createTable.sql" />
+		<copy file="${properties.scripts.creationPath}/${templateSQLFile}" tofile="${properties.scripts.creationPath}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="TRIP_TABLE" value="${properties.tables.trips(tmp)}" />
+					<token key="ROUTE_TABLE" value="${properties.tables.routes(tmp)}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.creationPath}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.creationPath}/${SQLFile}" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+			target: migrateStops                   
+	    - - - - - - - - - - - - - - - - - -->
+
+	<target name="migrateStops" description="migrates the TMP_SASA_STOPS Table">
+		<echo>Migrating data into table ${properties.tables.stops} </echo>
+		<antcall target="createTable">
+			<param name="tableName" value="${properties.tables.stops}" />
+			<param name="templateSQLFile" value="stops.sql" />
+		</antcall>
+		<!-- kml import follows here -->
+		<antcall target="loadKMLData">
+			<param name="tableName" value="${properties.tables.stops}" />
+		</antcall>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+		       private target: KMLImport                  
+		      - - - - - - - - - - - - - - - - - -->
+	<target name="loadKMLData">
+		<property name="tableName" value="${properties.tables.stops}" />
+		<property name="classDir" value="${properties.project.classDir}" />
+		<property name="kmlFile" value="sasa_ge_busdata.kml" />
+		<echo>Loading data from KML file into table ${tableName}</echo>
+		<copy file="${properties.project.inputPath}/${kmlFile}" todir="${classDir}/" />
+		<java classname="it.unibz.inf.dis.sasa2gtfs.utils.KMLImport" fork="true" classpathref="project.classpath">
+			<arg value="username=${properties.database.user}" />
+			<arg value="password=${properties.database.password}" />
+			<arg value="url=${properties.database.url}" />
+			<arg value="sid=${properties.database.sid}" />
+			<arg value="port=${properties.database.port}" />
+			<arg value="table=${tableName}" />
+			<arg value="httpFileUrl=${properties.KML.fileUrl}" />
+			<arg value="localFileUrl=${kmlFile}" />
+			<!--jvmarg value="-Dhttp.proxyHost=passage.inf.unibz.it"/>
+			<jvmarg value="-Dhttp.proxyPort=8080"/-->
+		</java>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+     private target: migrateCalendar                  
+  - - - - - - - - - - - - - - - - - -->
+	<target name="migrateCalendar">
+		<echo>Migrating data into tables ${properties.tables.calendar} and ${properties.tables.calendarDates}</echo>
+		<antcall target="createTable">
+			<param name="tableName" value="${properties.tables.calendar}" />
+			<param name="templateSQLFile" value="calendar.sql" />
+		</antcall>
+		<antcall target="createTable">
+			<param name="tableName" value="${properties.tables.calendarDates}" />
+			<param name="templateSQLFile" value="calendar_dates.sql" />
+		</antcall>
+		<java classname="it.unibz.inf.dis.sasa2gtfs.utils.Solari2GTFS" fork="true" classpathref="project.classpath">
+			<arg value="username=${properties.database.user}" />
+			<arg value="password=${properties.database.password}" />
+			<arg value="url=${properties.database.url}" />
+			<arg value="sid=${properties.database.sid}" />
+			<arg value="port=${properties.database.port}" />
+			<arg value="sourceTable=${properties.tables.trips(tmp)}" />
+			<arg value="destCalendarTable=${properties.tables.calendar}" />
+			<arg value="destCalendarExceptionTable=${properties.tables.calendarDates}" />
+		</java>
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+			       private target: createTable                  
+			      - - - - - - - - - - - - - - - - - -->
+	<target name="createTable">
+		<echo>Dropping and creating table: ${tableName} </echo>
+		<property name="tableName" value="@setme" />
+		<property name="templateSQLFile" value="@setme" />
+		<property name="tmpFile" value="tmp.txt" />
+		<property name="SQLFile" value="createTable.sql" />
+		<copy file="${properties.scripts.creationPath}/${templateSQLFile}" tofile="${properties.scripts.creationPath}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="TABLE_NAME" value="${tableName}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.creationPath}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${tmpFile}" />
+		<delete file="${properties.scripts.creationPath}/${SQLFile}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+   private target: loadData                  
+  - - - - - - - - - - - - - - - - - -->
+	<target name="loadData">
+		<echo>Importing data into table: ${tableName} </echo>
+		<property name="tableName" value="@setme" />
+		<property name="templateCtrlFile" value="@setme" />
+		<property name="sourceFile" value="@setme" />
+		<property name="dataFile" value="data.csv" />
+		<property name="logFile" value="import_${tableName}.log" />
+		<property name="ctrlFile" value="import_${tableName}.ctrl" />
+
+		<copy file="${properties.scripts.importPath}/${templateCtrlFile}" tofile="${properties.scripts.importPath}/${ctrlFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="TABLE_NAME" value="${tableName}" />
+					<token key="CSV_FILE" value="${dataFile}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+
+		<copy file="${sourceFile}" tofile="${properties.scripts.importPath}/${dataFile}" />
+		<!-- if headerfile specified copy the value>
+		<antcall target="appendHeader">
+			<param name="dataFile" value="${dataFile}"/>
+		</antcall-->
+		<exec dir="${properties.scripts.importPath}" executable="sqlldr">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="control=${ctrlFile}" />
+			<arg value="log=${logFile}" />
+		</exec>
+		<!-- Deleting temporary and log files-->
+		<delete file="${properties.scripts.importPath}/${ctrlFile}" />
+		<delete file="${properties.scripts.importPath}/${logFile}" />
+		<delete file="${properties.scripts.importPath}/${dataFile}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: appendHeader                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="appendHeader" if="headerFile">
+		<echo>Appending header ${properties.scripts.importPath}/${headerFile}</echo>
+		<property name="tmpFile" value="tmp_${headerFile}" />
+		<copy file="${properties.scripts.importPath}/${headerFile}" tofile="${tmpFile}">
+			<filterchain>
+				<concatfilter append="${properties.scripts.importPath}/${dataFile}" />
+				<tokenfilter delimoutput="${line.separator}" />
+			</filterchain>
+		</copy>
+		<copy file="${tmpFile}" tofile="${properties.scripts.importPath}/${dataFile}" />
+		<delete file="${tmpFile}" />
+	</target>
+
+
+	<!-- ================================= 
+          target: exportTables              
+         ================================= -->
+	<target name="exportTables" description="exports all tables in various textfiles">
+		<delete dir="${properties.project.outputPath}/" />
+		<mkdir dir="${properties.project.outputPath}" />
+		<echo message="Copying template files." />
+		<antcall target="export" description="exporting routes">
+			<param name="tableName" value="${properties.tables.routes}" />
+			<param name="exportFile" value="${properties.export.routes}" />
+			<param name="templateSQLFile" value="routes.sql" />
+			<param name="headerFile" value="${properties.export.routes(header)}" />
+		</antcall>
+		<antcall target="export" description="exporting trips">
+			<param name="tableName" value="${properties.tables.trips}" />
+			<param name="exportFile" value="${properties.export.trips}" />
+			<param name="templateSQLFile" value="trips.sql" />
+			<param name="headerFile" value="${properties.export.trips(header)}" />
+		</antcall>
+		<antcall target="export" description="exporting stops">
+			<param name="tableName" value="${properties.tables.stops}" />
+			<param name="exportFile" value="${properties.export.stops}" />
+			<param name="templateSQLFile" value="stops.sql" />
+			<param name="headerFile" value="${properties.export.stops(header)}" />
+		</antcall>
+		<antcall target="export" description="exporting stoptimes">
+			<param name="tableName" value="${properties.tables.stoptimes}" />
+			<param name="exportFile" value="${properties.export.stoptimes}" />
+			<param name="templateSQLFile" value="stoptimes.sql" />
+			<param name="headerFile" value="${properties.export.stoptimes(header)}" />
+		</antcall>
+		<antcall target="export" description="exporting calendar">
+			<param name="tableName" value="${properties.tables.calendar}" />
+			<param name="exportFile" value="${properties.export.calendar}" />
+			<param name="templateSQLFile" value="calendar.sql" />
+			<param name="headerFile" value="${properties.export.calendar(header)}" />
+		</antcall>
+		<antcall target="export" description="exporting calendarDates">
+			<param name="tableName" value="${properties.tables.calendarDates}" />
+			<param name="exportFile" value="${properties.export.calendarDates}" />
+			<param name="templateSQLFile" value="calendar_dates.sql" />
+			<param name="headerFile" value="${properties.export.calendarDates(header)}" />
+		</antcall>
+		<copy file="${properties.scripts.exportPath}/header_agency.txt" tofile="${properties.project.outputPath}/agency.txt" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+				target: export                  
+		 - - - - - - - - - - - - - - - - - -->
+	<target name="export" description="Exports a table into the specified file.">
+		<property name="tableName" value="Override" />
+		<property name="exportFile" value="Override" />
+		<property name="headerFile" value="Override" />
+		<property name="templateSQLFile" value="Override" />
+		<property name="SQLFile" value="export.sql" />
+		<property name="tmpFile" value="tmp.txt" />
+		<property name="outFile" value="out.txt" />
+		<echo>Exporting table ${tableName} into file ${properties.project.outputPath}/${exportFile} .</echo>
+		<copy file="${properties.scripts.exportPath}/${templateSQLFile}" tofile="${properties.project.outputPath}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="TABLE_NAME" value="${tableName}" />
+					<token key="OUTPUT_FILE" value="${outFile}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.project.outputPath}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<copy file="${properties.scripts.exportPath}/${headerFile}" tofile="${properties.project.outputPath}/${tmpFile}" />
+		<copy file="${properties.project.outputPath}/${tmpFile}" tofile="${properties.project.outputPath}/${exportFile}">
+			<filterchain>
+				<tokenfilter delimoutput="${line.separator}" />
+				<concatfilter append="${properties.project.outputPath}/${outFile}" />
+			</filterchain>
+		</copy>
+		<!-- Deleting temporary and log files-->
+		<delete file="${properties.project.outputPath}/${SQLFile}" />
+		<delete file="${properties.project.outputPath}/${tmpFile}" />
+		<delete file="${properties.project.outputPath}/${outFile}" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+					target: dropTables                  
+			 - - - - - - - - - - - - - - - - - -->
+	<target name="dropTables" description="Drops temporary and eventuelly all tables">
+		<echo>Deleting temporary tables...</echo>
+		<antcall target="dropTable">
+			<param name="tableName" value="${properties.tables.routes(tmp)}" />
+		</antcall>
+		<antcall target="dropTable">
+			<param name="tableName" value="${properties.tables.trips(tmp)}" />
+		</antcall>
+		<antcall target="dropTable">
+			<param name="tableName" value="${properties.tables.stoptimes(tmp)}" />
+		</antcall>
+		<if>
+			<equals arg1="${properties.database.cleantables}" arg2="true" />
+			<then>
+				<echo>Deleting permanent tables...</echo>
+				<antcall target="dropTable">
+					<param name="tableName" value="${properties.tables.routes}" />
+				</antcall>
+				<antcall target="dropTable">
+					<param name="tableName" value="${properties.tables.trips}" />
+				</antcall>
+				<antcall target="dropTable">
+					<param name="tableName" value="${properties.tables.stoptimes}" />
+				</antcall>
+				<antcall target="dropTable">
+					<param name="tableName" value="${properties.tables.stops}" />
+				</antcall>
+				<antcall target="dropTable">
+					<param name="tableName" value="${properties.tables.calendar}" />
+				</antcall>
+				<antcall target="dropTable">
+					<param name="tableName" value="${properties.tables.calendarDates}" />
+				</antcall>
+			</then>
+		</if>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+					target: dropTable                  
+			 - - - - - - - - - - - - - - - - - -->
+	<target name="dropTable" description="Drops the specified table">
+		<property name="tableName" value="@override" />
+		<echo>Deleting temporary table ${tableName}</echo>
+		<property name="templateSQLFile" value="deleteTable.sql" />
+		<property name="SQLFile" value="delete.sql" />
+		<copy file="${properties.scripts(path)}/${templateSQLFile}" tofile="${properties.scripts(path)}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="TABLE_NAME" value="${tableName}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts(path)}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts(path)}/${SQLFile}" />
+	</target>
+
+	<target name="showClasspath">
+		<echo>Used classpath: ${java.class.path}</echo>
+		<echo>Our classpath: ${classpath} </echo>
+	</target>
+
+	<!-- ================================= 
+          target: makeZip              
+         ================================= -->
+	<target name="fetchDataFromWeb" description="Downloads the data from the SASA web page">
+		<echo message="Downloading data from ${properties.project.sasaURL}" />
+		<get dest="${properties.project.inputPath}/">
+			<url url="${properties.project.sasaURL}/linee.csv" />
+			<url url="${properties.project.sasaURL}/lineeCorse.csv" />
+			<url url="${properties.project.sasaURL}/orariPassaggio.csv" />
+			<url url="${properties.project.sasaURL}/sasa_ge_busdata.kml" />
+		</get>
+		<zip destfile="${properties.project.inputPath}/sasa.zip">
+			<date />
+			<fileset dir="${properties.project.inputPath}">
+				<include name="**/linee.csv" />
+				<include name="**/lineeCorse.csv" />
+				<include name="**/orariPassaggio.csv" />
+				<include name="**/sasa_ge_busdata.kml" />
+			</fileset>
+		</zip>
+	</target>
+
+	<!-- ================================= 
+	          target: gtfs2isochrones              
+	         ================================= -->
+	<target name="gtfs2isochrones" depends="compile" description="Sets up the environment">
+		<antcall target="initContinuousNetwork" />
+		<antcall target="initDiscreteNetwork" />
+		<antcall target="mergeNetwork" />
+	</target>
+
+
+	<!-- ================================= 
+          target: initContinuousNetwork              
+         ================================= -->
+	<target name="initContinuousNetwork" description="Initialized the pedestrian network">
+		<antcall target="createNodeSequence" description="Populates new ids to the nodes" />
+		<antcall target="createContinuousNetwork" />
+		<antcall target="createSpatialIndex">
+			<param name="table_name" value="${properties.tables.pedEdges}" />
+		</antcall>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+	          target: createNodeSequence                      
+	         - - - - - - - - - - - - - - - - - -->
+	<target name="createNodeSequence" description="Creates the node sequence starting from the maximal value+1 from the train stops">
+		<echo>Createing node Sequence </echo>
+		<copy file="${properties.scripts.gtfs2isochrones}/createSequenceFromMaxValue.sql" tofile="${properties.scripts.gtfs2isochrones}/${SQLFile}" overwrite="true">
+			<filterchain>
+				<replacetokens>
+					<token key="SEQUENCE_NAME" value="${properties.database.sequences.nodes}" />
+					<token key="COLUMN_NAME" value="STOP_ID" />
+					<token key="TABLE_NAME" value="${properties.tables.stops}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.gtfs2isochrones}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.gtfs2isochrones}/${SQLFile}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+  target: createEdgeSequence                      
+   - - - - - - - - - - - - - - - - - -->
+	<target name="createEdgeSequence">
+		<echo message="">Creating edge sequence </echo>
+		<copy file="${properties.scripts.gtfs2isochrones}/createSequenceFromMaxValue.sql" tofile="${properties.scripts.gtfs2isochrones}/${SQLFile}" overwrite="true">
+			<filterchain>
+				<replacetokens>
+					<token key="SEQUENCE_NAME" value="${properties.database.sequences.edges}" />
+					<token key="TABLE_NAME" value="${properties.tables.edges}" />
+					<token key="COLUMN_NAME" value="ID" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.gtfs2isochrones}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.gtfs2isochrones}/${SQLFile}" />
+		<echo>Done.... </echo>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+		          target: createContinuousNetwork                      
+		         - - - - - - - - - - - - - - - - - -->
+	<target name="createContinuousNetwork" description="Creates new edge and node table using values of the new node sequence">
+		<echo>Generating pedestrian edge table. May take some time .. </echo>
+		<copy file="${properties.scripts.gtfs2isochrones}/createContinuousNetwork.sql" tofile="${properties.scripts.gtfs2isochrones}/${SQLFile}" overwrite="true">
+			<filterchain>
+				<replacetokens>
+					<token key="SEQUENCE_NAME" value="${properties.database.sequences.nodes}" />
+					<token key="PED_EDGE_TABLE" value="${properties.tables.pedEdges}" />
+					<token key="PED_NODE_TABLE" value="${properties.tables.pedNodes}" />
+					<token key="ORIG_PED_EDGE_TABLE" value="${properties.tables.origPedEdges}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.gtfs2isochrones}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+			<arg value="-S" />
+		</exec>
+		<delete file="${properties.scripts.gtfs2isochrones}/${SQLFile}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+			          target: createSpatialIndex                      
+			         - - - - - - - - - - - - - - - - - -->
+	<target name="createSpatialIndex">
+		<echo>Creating spatial index. May take some time .. </echo>
+		<property name="table_name" value="setMe!!" />
+
+		<copy file="${properties.scripts.gtfs2isochrones}/createSpatialIndex.sql" tofile="${properties.scripts.gtfs2isochrones}/${SQLFile}" overwrite="true">
+			<filterchain>
+				<replacetokens>
+					<token key="TABLE_NAME" value="${table_name}" />
+					<token key="DIM1" value="${properties.spatial.dim1}" />
+					<token key="DIM2" value="${properties.spatial.dim2}" />
+					<token key="SRID" value="${properties.spatial.srid}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.gtfs2isochrones}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.gtfs2isochrones}/${SQLFile}" />
+	</target>
+
+
+
+
+	<!-- ================================= 
+					          target: initDiscreteNetwork              
+					         ================================= -->
+	<target name="initDiscreteNetwork" description="Initialized the bus network">
+		<!-- extract information from the web-->
+		<antcall target="createDiscreteEdges" />
+		<!--antcall target="correctStoptimes">
+			<param name="tableName" value="${properties.tables.stoptimes}" />
+		</antcal-->
+		<antcall target="createSpatialIndex" description="Creates the spatial index on the discrete stops">
+			<param name="table_name" value="${properties.tables.stops}" />
+		</antcall>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+		       target: createDiscreteEdges                    
+		      - - - - - - - - - - - - - - - - - -->
+	<target name="createDiscreteEdges">
+		<echo>Creating bus edges table. This may take a while .... </echo>
+		<copy file="${properties.scripts.gtfs2isochrones}/createDiscreteEdges.sql" tofile="${properties.scripts.gtfs2isochrones}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="TABLE_NAME" value="${properties.tables.discreteEdges}" />
+					<token key="STOPTIMES_TABLE" value="${properties.tables.stoptimes}" />
+					<token key="TRIPS_TABLE" value="${properties.tables.trips}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<loadfile property="mytext" srcFile="${properties.scripts.gtfs2isochrones}/${SQLFile}" />
+		<echo>Executing sql file ${SQLFile} </echo>
+		<echo>${mytext}</echo>
+		<exec dir="${properties.scripts.gtfs2isochrones}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.gtfs2isochrones}/${SQLFile}" />
+	</target>
+
+	<target name="correctStoptimes" description="corrects the stoptimes date format for the DEPARTURE_TIME">
+		<property name="tableName" value="${properties.tables.stoptimes}" />
+		<property name="origFile" value="updateTmpStoptimes.sql" />
+		<property name="SQLFile" value="update.sql" />
+		<echo>updating stoptime table  .... </echo>
+		<copy file="${properties.scripts.creationPath}/${origFile}" tofile="${properties.scripts.creationPath}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="TABLE_NAME" value="${tableName}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.creationPath}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.creationPath}/${SQLFile}" />
+
+		<java classname="it.unibz.inf.dis.utils.CorrectOverFloatingStopTimes" fork="true" classpathref="project.classpath">
+			<arg value="username=${properties.database.user}" />
+			<arg value="password=${properties.database.password}" />
+			<arg value="url=${properties.database.url}" />
+			<arg value="sid=${properties.database.sid}" />
+			<arg value="port=${properties.database.port}" />
+			<arg value="stoptimesTableName=${tableName}" />
+		</java>
+
+	</target>
+
+
+	<!-- ================================= 
+	          target: mergeNetwork              
+	         ================================= -->
+	<target name="mergeNetwork" description="Merges bus and pedestrian network">
+		<antcall target="createMappingTable" />
+		<antcall target="insertContinuousEdges" />
+		<antcall target="splitNetwork" />
+		<antcall target="insertInvertedContinuousEdges" />
+		<antcall target="insertDiscreteEdges" />
+		<antcall target="createNodeTable" />
+		<antcall target="updateEdgeTable" />
+		<antcall target="createSchedules" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+			          target: createMappingTable                      
+			         - - - - - - - - - - - - - - - - - -->
+	<target name="createMappingTable">
+		<echo>Updating the pedestrian network </echo>
+		<copy file="${properties.scripts.gtfs2isochrones}/createMappingTable.sql" tofile="${properties.scripts.gtfs2isochrones}/${SQLFile}" overwrite="true">
+			<filterchain>
+				<replacetokens>
+					<token key="MAPPING_TABLE" value="${properties.tables.mapping}" />
+					<token key="EDGE_TABLE" value="${properties.tables.pedEdges}" />
+					<token key="STOP_TABLE" value="${properties.tables.stops}" />
+					<token key="THRESHOLD" value="${properties.tools.mergeNw.distancetolerance}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.gtfs2isochrones}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.gtfs2isochrones}/${SQLFile}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+						          target: insertContinuousEdges                      
+						         - - - - - - - - - - - - - - - - - -->
+	<target name="insertContinuousEdges">
+		<echo>Creating the edge table</echo>
+		<copy file="${properties.scripts.gtfs2isochrones}/createEdgeTable.sql" tofile="${properties.scripts.gtfs2isochrones}/${SQLFile}" overwrite="true">
+			<filterchain>
+				<replacetokens>
+					<token key="EDGE_TABLE" value="${properties.tables.edges}" />
+					<token key="PED_EDGE_TABLE" value="${properties.tables.pedEdges}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.gtfs2isochrones}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.gtfs2isochrones}/${SQLFile}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+						          target: splitNetwork                      
+						         - - - - - - - - - - - - - - - - - -->
+	<target name="splitNetwork">
+		<java classname="it.unibz.inf.dis.utils.NetworkSplitter" fork="true" classpathref="project.classpath">
+			<arg value="username=${properties.database.user}" />
+			<arg value="password=${properties.database.password}" />
+			<arg value="url=${properties.database.url}" />
+			<arg value="sid=${properties.database.sid}" />
+			<arg value="port=${properties.database.port}" />
+			<arg value="pedEdgeTable=${properties.tables.pedEdges}" />
+			<arg value="edgeTable=${properties.tables.edges}" />
+			<arg value="mappingTable=${properties.tables.mapping}" />
+		</java>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+								          target: insertInvertedContinuousEdges                      
+								         - - - - - - - - - - - - - - - - - -->
+	<target name="insertInvertedContinuousEdges" depends="createEdgeSequence">
+		<echo>Inserting inverted edges ...</echo>
+		<copy file="${properties.scripts.gtfs2isochrones}/insertInvertedContinuousEdges.sql" tofile="${properties.scripts.gtfs2isochrones}/${SQLFile}" overwrite="true">
+			<filterchain>
+				<replacetokens>
+					<token key="TABLE_NAME" value="${properties.tables.edges}" />
+					<token key="SEQUENCE_NAME" value="${properties.database.sequences.edges}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.gtfs2isochrones}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.gtfs2isochrones}/${SQLFile}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+								          target: insertDiscreteEdges                      
+								         - - - - - - - - - - - - - - - - - -->
+	<target name="insertDiscreteEdges">
+		<echo>Inserting discrete edges</echo>
+		<copy file="${properties.scripts.gtfs2isochrones}/insertDiscreteEdges.sql" tofile="${properties.scripts.gtfs2isochrones}/${SQLFile}" overwrite="true">
+			<filterchain>
+				<replacetokens>
+					<token key="EDGE_TABLE" value="${properties.tables.edges}" />
+					<token key="BUS_EDGES" value="${properties.tables.discreteEdges}" />
+					<token key="SEQUENCE_NAME" value="${properties.database.sequences.edges}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.gtfs2isochrones}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.gtfs2isochrones}/${SQLFile}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+									          target: createNodeTable                      
+									         - - - - - - - - - - - - - - - - - -->
+	<target name="createNodeTable">
+		<echo>Creating the node table. May take a while .... </echo>
+		<copy file="${properties.scripts.gtfs2isochrones}/createNodeTable.sql" tofile="${properties.scripts.gtfs2isochrones}/${SQLFile}" overwrite="true">
+			<filterchain>
+				<replacetokens>
+					<token key="EDGE_TABLE" value="${properties.tables.edges}" />
+					<token key="NODE_TABLE" value="${properties.tables.nodes}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.gtfs2isochrones}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.gtfs2isochrones}/${SQLFile}" />
+		<antcall target="createSpatialIndex">
+			<param name="table_name" value="${properties.tables.nodes}" />
+		</antcall>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+										          target: updateEdgeTable                      
+										         - - - - - - - - - - - - - - - - - -->
+	<target name="updateEdgeTable">
+		<echo>Update edge table. May take a while .... </echo>
+		<copy file="${properties.scripts.gtfs2isochrones}/updateEdgeTable.sql" tofile="${properties.scripts.gtfs2isochrones}/${SQLFile}" overwrite="true">
+			<filterchain>
+				<replacetokens>
+					<token key="EDGE_TABLE" value="${properties.tables.edges}" />
+					<token key="NODE_TABLE" value="${properties.tables.nodes}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.gtfs2isochrones}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.gtfs2isochrones}/${SQLFile}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+					       target: createSchedules                    
+					      - - - - - - - - - - - - - - - - - -->
+	<target name="createSchedules" depends="initPostFunctions">
+		<property name="TMP_STOPTIMES" value="TMP_${properties.tables.stoptimes}" />
+		<antcall target="updateStoptimes">
+			<param name="tempStoptimeTable" value="${TMP_STOPTIMES}" />
+		</antcall>
+		<echo>Creating the (optimized) schedule table.... </echo>
+		<copy file="${properties.scripts.gtfs2isochrones}/createSchedules.sql" tofile="${properties.scripts.gtfs2isochrones}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="SCHEDULE_TABLE" value="${properties.tables.schedules}" />
+					<token key="STOPTIMES_TABLE" value="${TMP_STOPTIMES}" />
+					<token key="LINK_TABLE" value="${properties.tables.edges}" />
+					<token key="TRIP_TABLE" value="${properties.tables.trips}" />
+					<token key="CALENDAR_TABLE" value="${properties.tables.calendar}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.gtfs2isochrones}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.gtfs2isochrones}/${SQLFile}" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: updateStoptimes                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="updateStoptimes" depends="" description="updates the stoptimes by setting arrivaltime null on first trip entry and departuretime null on last trip entry">
+		<!-- update nulls -->
+		<echo>Updating stoptimes table ${properties.tables.stoptimes} .... </echo>
+		<property name="SQLFile" value="update.sql" />
+		<property name="origFile" value="updateStoptimes.sql" />
+		<property name="tempStoptimeTable" value="tempStoptimeTable" />
+		<copy file="${properties.scripts.gtfs2isochrones}/${origFile}" tofile="${properties.scripts.gtfs2isochrones}/${SQLFile}">
+			<filterchain>
+				<replacetokens>
+					<token key="TABLE_NAME" value="${tempStoptimeTable}" />
+					<token key="STOPTIMES_TABLE" value="${properties.tables.stoptimes}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<exec dir="${properties.scripts.gtfs2isochrones}" executable="sqlplus">
+			<arg value="${properties.database.user}/${properties.database.password}" />
+			<arg value="@${SQLFile}" />
+		</exec>
+		<delete file="${properties.scripts.gtfs2isochrones}/${SQLFile}" />
+	</target>
+
+</project>

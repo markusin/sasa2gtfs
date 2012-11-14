@@ -1,0 +1,1 @@
+Bezugs_id;Fahrten_id;Linien_id;Buslinie;Betriebsbereich;Linenbeschreibung_it;Linenbeschreibung_de;Fahrtrichtung;Gueltigkeit_ab;Kalender

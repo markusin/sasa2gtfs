@@ -1,0 +1,1 @@
+Bezugs_id;Linien_id;Haltestellen_id;Zaehl_id;Fahrtzeit
